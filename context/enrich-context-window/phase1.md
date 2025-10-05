@@ -24,23 +24,23 @@
 
 ## Progress Summary
 
-| Task ID | Task Name                                                                  | Status     | Est. Time |
-| ------- | -------------------------------------------------------------------------- | ---------- | --------- |
-| T001    | Add formatTokenCount helper                                                | ✅ Done    | 0.5h      |
-| T002    | Unit tests for formatTokenCount                                            | ✅ Done    | 0.5h      |
-| T003    | Design TokenUsage types & API surface                                      | ✅ Done    | 0.5h      |
-| T004    | Implement TokenUsageContext provider scaffold                              | ✅ Done    | 1h        |
-| T005    | Hook to read token usage from SessionStats                                 | ✅ Done    | 0.5h      |
+| Task ID | Task Name                                                                  | Status         | Est. Time |
+| ------- | -------------------------------------------------------------------------- | -------------- | --------- |
+| T001    | Add formatTokenCount helper                                                | ✅ Done        | 0.5h      |
+| T002    | Unit tests for formatTokenCount                                            | ✅ Done        | 0.5h      |
+| T003    | Design TokenUsage types & API surface                                      | ✅ Done        | 0.5h      |
+| T004    | Implement TokenUsageContext provider scaffold                              | ✅ Done        | 1h        |
+| T005    | Hook to read token usage from SessionStats                                 | ✅ Done        | 0.5h      |
 | T006    | Instrument ChatCompressed events                                           | ⏳ In Progress | 1h        |
-| T007    | Instrument save_memory handling in handleCompletedTools                    | ⏳ Pending | 0.5h      |
-| T008    | Instrument successful sendMessageStream path to update highWaterMark       | ⏳ Pending | 1h        |
-| T009    | Footer UI: render used / limit + high-water + compression threshold        | ⏳ Pending | 1h        |
-| T010    | Accessibility: expose full values to screen readers                        | ⏳ Pending | 0.5h      |
-| T011    | Add settings ui.footer.showTokenCounts and wire to config                  | ⏳ Pending | 1h        |
-| T012    | Unit tests for TokenUsageContext behavior                                  | ⏳ Pending | 1h        |
-| T013    | Integration test: ChatCompressed -> SessionStats updates -> footer renders | ⏳ Pending | 1h        |
-| T014    | Integration test: successful API response updates highWaterMark            | ⏳ Pending | 1h        |
-| T015    | Docs: short note in docs/cli describing new setting                        | ⏳ Pending | 0.5h      |
+| T007    | Instrument save_memory handling in handleCompletedTools                    | ⏳ Pending     | 0.5h      |
+| T008    | Instrument successful sendMessageStream path to update highWaterMark       | ⏳ Pending     | 1h        |
+| T009    | Footer UI: render used / limit + high-water + compression threshold        | ⏳ Pending     | 1h        |
+| T010    | Accessibility: expose full values to screen readers                        | ⏳ Pending     | 0.5h      |
+| T011    | Add settings ui.footer.showTokenCounts and wire to config                  | ⏳ Pending     | 1h        |
+| T012    | Unit tests for TokenUsageContext behavior                                  | ⏳ Pending     | 1h        |
+| T013    | Integration test: ChatCompressed -> SessionStats updates -> footer renders | ⏳ Pending     | 1h        |
+| T014    | Integration test: successful API response updates highWaterMark            | ⏳ Pending     | 1h        |
+| T015    | Docs: short note in docs/cli describing new setting                        | ⏳ Pending     | 0.5h      |
 
 ## Tasks (detailed)
 
@@ -110,13 +110,14 @@
 
 ### T006 · Instrument ChatCompressed events
 
-- Status: ⏳ In Progress
+- Status: ✅ Done
 - Started: 2025-10-05T21:59:22Z
+- Completed: 2025-10-05T22:46:35Z
 - Est. Time: 1h
 - Todo:
-  - [ ] Add instrumentation in [`packages/cli/src/ui/hooks/useGeminiStream.ts`](packages/cli/src/ui/hooks/useGeminiStream.ts:584) to update compressionThreshold, lastCompressed original/new counts.
-  - [ ] Ensure updates call TokenUsageContext APIs.
-  - [ ] Add unit/integration test stub (integration tests T013 covers end-to-end).
+  - [x] Add instrumentation in [`packages/cli/src/ui/hooks/useGeminiStream.ts`](packages/cli/src/ui/hooks/useGeminiStream.ts:584) to update compressionThreshold, lastCompressed original/new counts.
+  - [x] Ensure updates call TokenUsageContext APIs.
+  - [x] Add unit/integration test stub (integration tests T013 covers end-to-end).
 - Success criteria:
   - Emitting a ChatCompressed message updates TokenUsageContext values in test runs.
 
