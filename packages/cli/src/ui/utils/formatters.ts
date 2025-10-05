@@ -103,8 +103,9 @@ export const formatTokenCount = (tokens: number, short = true): string => {
   for (const unit of units) {
     if (abs >= unit.value) {
       const v = n / unit.value;
-      // Show one decimal for values below 10 (e.g., 4.5k), otherwise no decimals (e.g., 12k)
-      const formatted = Math.abs(v) < 10 ? v.toFixed(1) : v.toFixed(0);
+      // Show one decimal for values below 100 (e.g., 12.3k), otherwise no decimals (e.g., 123k).
+      // This keeps short representations human-friendly for common magnitudes.
+      const formatted = Math.abs(v) < 100 ? v.toFixed(1) : v.toFixed(0);
       return `${formatted}${unit.suffix}`;
     }
   }
