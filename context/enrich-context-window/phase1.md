@@ -111,8 +111,8 @@
 ### T006 · Instrument ChatCompressed events
 
 - Status: ✅ Done
-- Started: 2025-10-05T21:59:22Z
-- Completed: 2025-10-05T22:46:35Z
+- Started: 2025-10-05T22:48:39Z
+- Completed: 2025-10-05T22:50:26Z
 - Est. Time: 1h
 - Todo:
   - [x] Add instrumentation in [`packages/cli/src/ui/hooks/useGeminiStream.ts`](packages/cli/src/ui/hooks/useGeminiStream.ts:584) to update compressionThreshold, lastCompressed original/new counts.

@@ -62,7 +62,7 @@ import {
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { useSessionStats } from '../contexts/SessionContext.js';
-import { useTokenUsageApi } from '../TokenUsageContext';
+import { useTokenUsageApi } from '../TokenUsageContext.js';
 import { useKeypress } from './useKeypress.js';
 import type { LoadedSettings } from '../../config/settings.js';
 
@@ -618,11 +618,22 @@ export const useGeminiStream = (
       // - compressionThreshold <- event.compressionThreshold (if present)
       // - lastSuccessfulRequestTokenCount <- event.originalTokenCount (store original count as a sensible existing field)
       try {
+        // Read compressionThreshold defensively because the runtime payload may include it
+        // even if the TypeScript definition does not. Prefer the event value when present,
+        // otherwise retain existing value from the token usage snapshot.
+        const compressionThresholdFromEvent =
+          (eventValue as unknown as { compressionThreshold?: number })
+            .compressionThreshold ?? tokenUsageApi.get().compressionThreshold;
+
+        // Map the compressed/new token count into the existing lastSuccessfulRequestTokenCount
+        // field per design. If newTokenCount is absent, set to null to indicate unknown.
+        const compressedNewCount =
+          (eventValue as unknown as { newTokenCount?: number }).newTokenCount ??
+          null;
+
         tokenUsageApi?.update?.({
-          compressionThreshold:
-            eventValue?.compressionThreshold ?? tokenUsageApi.get().compressionThreshold,
-          lastSuccessfulRequestTokenCount:
-            eventValue?.originalTokenCount ?? tokenUsageApi.get().lastSuccessfulRequestTokenCount,
+          compressionThreshold: compressionThresholdFromEvent,
+          lastSuccessfulRequestTokenCount: compressedNewCount,
         });
       } catch {
         // Swallow errors in instrumentation to avoid affecting UX.
@@ -640,7 +651,13 @@ export const useGeminiStream = (
         Date.now(),
       );
     },
-    [addItem, config, pendingHistoryItemRef, setPendingHistoryItem, tokenUsageApi],
+    [
+      addItem,
+      config,
+      pendingHistoryItemRef,
+      setPendingHistoryItem,
+      tokenUsageApi,
+    ],
   );
 
   const handleMaxSessionTurnsEvent = useCallback(
@@ -1227,6 +1244,8 @@ export const useGeminiStream = (
     cancelOngoingRequest,
     pendingToolCalls: toolCalls,
     handleApprovalModeChange,
+    // Expose the chat compression handler for testing/instrumentation usage.
+    handleChatCompressionEvent,
     activePtyId,
     loopDetectionConfirmationRequest,
   };
