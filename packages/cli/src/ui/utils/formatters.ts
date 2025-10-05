@@ -61,3 +61,54 @@ export const formatDuration = (milliseconds: number): string => {
 
   return parts.join(' ');
 };
+
+/**
+ * formatTokenCount
+ *
+ * Format a token count either as a short, human-friendly shorthand (e.g., "12.3k")
+ * or as a full integer with commas (e.g., "12,345").
+ *
+ * Edge-case examples:
+ *  - formatTokenCount(0, true)  => "0"
+ *  - formatTokenCount(999, true) => "999"
+ *  - formatTokenCount(1000, true) => "1.0k"
+ *  - formatTokenCount(12345, true) => "12.3k"
+ *  - formatTokenCount(12345, false) => "12,345"
+ *
+ * @param tokens The token count to format.
+ * @param short Whether to use shorthand (true) or full integer with commas (false). Defaults to true.
+ */
+export const formatTokenCount = (tokens: number, short = true): string => {
+  const n = Number.isFinite(tokens) ? Math.round(tokens) : 0;
+  if (n <= 0) return '0';
+
+  if (!short) {
+    return new Intl.NumberFormat('en-US').format(n);
+  }
+
+  const abs = Math.abs(n);
+
+  // Below 1k, show plain integer
+  if (abs < 1000) {
+    return `${n}`;
+  }
+
+  // Define units for shorthand formatting
+  const units = [
+    { value: 1_000_000_000, suffix: 'B' },
+    { value: 1_000_000, suffix: 'M' },
+    { value: 1_000, suffix: 'k' },
+  ];
+
+  for (const unit of units) {
+    if (abs >= unit.value) {
+      const v = n / unit.value;
+      // Show one decimal for values below 10 (e.g., 4.5k), otherwise no decimals (e.g., 12k)
+      const formatted = Math.abs(v) < 10 ? v.toFixed(1) : v.toFixed(0);
+      return `${formatted}${unit.suffix}`;
+    }
+  }
+
+  // Fallback to integer
+  return `${n}`;
+};
