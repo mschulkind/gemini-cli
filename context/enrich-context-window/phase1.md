@@ -31,7 +31,7 @@
 | T003    | Design TokenUsage types & API surface                                      | ✅ Done    | 0.5h      |
 | T004    | Implement TokenUsageContext provider scaffold                              | ✅ Done    | 1h        |
 | T005    | Hook to read token usage from SessionStats                                 | ✅ Done    | 0.5h      |
-| T006    | Instrument ChatCompressed events                                           | ⏳ Pending | 1h        |
+| T006    | Instrument ChatCompressed events                                           | ⏳ In Progress | 1h        |
 | T007    | Instrument save_memory handling in handleCompletedTools                    | ⏳ Pending | 0.5h      |
 | T008    | Instrument successful sendMessageStream path to update highWaterMark       | ⏳ Pending | 1h        |
 | T009    | Footer UI: render used / limit + high-water + compression threshold        | ⏳ Pending | 1h        |
@@ -110,7 +110,8 @@
 
 ### T006 · Instrument ChatCompressed events
 
-- Status: ⏳ Pending
+- Status: ⏳ In Progress
+- Started: 2025-10-05T21:59:22Z
 - Est. Time: 1h
 - Todo:
   - [ ] Add instrumentation in [`packages/cli/src/ui/hooks/useGeminiStream.ts`](packages/cli/src/ui/hooks/useGeminiStream.ts:584) to update compressionThreshold, lastCompressed original/new counts.

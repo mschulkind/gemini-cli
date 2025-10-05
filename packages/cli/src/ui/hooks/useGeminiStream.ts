@@ -62,6 +62,7 @@ import {
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { useSessionStats } from '../contexts/SessionContext.js';
+import { useTokenUsageApi } from '../TokenUsageContext';
 import { useKeypress } from './useKeypress.js';
 import type { LoadedSettings } from '../../config/settings.js';
 
@@ -117,6 +118,7 @@ export const useGeminiStream = (
     useStateAndRef<HistoryItemWithoutId | null>(null);
   const processedMemoryToolsRef = useRef<Set<string>>(new Set());
   const { startNewPrompt, getPromptCount } = useSessionStats();
+  const tokenUsageApi = useTokenUsageApi();
   const storage = config.storage;
   const logger = useLogger(storage);
   const gitService = useMemo(() => {
@@ -610,6 +612,22 @@ export const useGeminiStream = (
         addItem(pendingHistoryItemRef.current, userMessageTimestamp);
         setPendingHistoryItem(null);
       }
+
+      // Instrumentation: update TokenUsage partials when a ChatCompressed event is observed.
+      // Mapping to existing TokenUsage fields:
+      // - compressionThreshold <- event.compressionThreshold (if present)
+      // - lastSuccessfulRequestTokenCount <- event.originalTokenCount (store original count as a sensible existing field)
+      try {
+        tokenUsageApi?.update?.({
+          compressionThreshold:
+            eventValue?.compressionThreshold ?? tokenUsageApi.get().compressionThreshold,
+          lastSuccessfulRequestTokenCount:
+            eventValue?.originalTokenCount ?? tokenUsageApi.get().lastSuccessfulRequestTokenCount,
+        });
+      } catch {
+        // Swallow errors in instrumentation to avoid affecting UX.
+      }
+
       return addItem(
         {
           type: 'info',
@@ -622,7 +640,7 @@ export const useGeminiStream = (
         Date.now(),
       );
     },
-    [addItem, config, pendingHistoryItemRef, setPendingHistoryItem],
+    [addItem, config, pendingHistoryItemRef, setPendingHistoryItem, tokenUsageApi],
   );
 
   const handleMaxSessionTurnsEvent = useCallback(
