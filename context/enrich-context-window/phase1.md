@@ -28,7 +28,7 @@
 | ------- | -------------------------------------------------------------------------- | ---------- | --------- |
 | T001    | Add formatTokenCount helper                                                | ✅ Done    | 0.5h      |
 | T002    | Unit tests for formatTokenCount                                            | ✅ Done    | 0.5h      |
-| T003    | Design TokenUsage types & API surface                                      | ⏳ Pending | 0.5h      |
+| T003    | Design TokenUsage types & API surface                                      | ✅ Done    | 0.5h      |
 | T004    | Implement TokenUsageContext provider scaffold                              | ⏳ Pending | 1h        |
 | T005    | Hook to read token usage from SessionStats                                 | ⏳ Pending | 0.5h      |
 | T006    | Instrument ChatCompressed events                                           | ⏳ Pending | 1h        |
@@ -73,22 +73,26 @@
 
 ### T003 · Design TokenUsage types & API surface
 
-- Status: ⏳ Pending
+- Status: ✅ Done
+- Started: 2025-10-05T21:46:04Z
+- Completed: 2025-10-05T21:46:05Z
 - Est. Time: 0.5h
 - Todo:
-  - [ ] Define minimal TypeScript types: TokenUsage (currentInputTokens, memoryTokens, modelContextLimit, compressionThreshold, highWaterMark, lastSuccessfulRequestTokenCount).
-  - [ ] Update plan references in the design doc or an inline comment linking to the plan: [`plans/enrich-context-window.md`](plans/enrich-context-window.md:1).
+  - [x] Define minimal TypeScript types: TokenUsage (currentInputTokens, memoryTokens, modelContextLimit, compressionThreshold, highWaterMark, lastSuccessfulRequestTokenCount).
+  - [x] Update plan references in the design doc or an inline comment linking to the plan: [`plans/enrich-context-window.md`](plans/enrich-context-window.md:1).
 - Success criteria:
   - Types reviewed and agreed; small enough to be implemented in T004.
 
 ### T004 · Implement TokenUsageContext provider scaffold
 
-- Status: ⏳ Pending
+- Status: ✅ Done
+- Started: 2025-10-05T21:50:06Z
+- Completed: 2025-10-05T21:50:06Z
 - Est. Time: 1h
 - Todo:
-  - [ ] Create context/provider files under `packages/cli/src/ui/` (e.g., TokenUsageContext.tsx).
-  - [ ] Provide read/write hooks and initial state.
-  - [ ] Add unit tests scaffold (implementation tests in T012).
+  - [x] Create context/provider files under `packages/cli/src/ui/` (e.g., TokenUsageContext.tsx).
+  - [x] Provide read/write hooks and initial state.
+  - [x] Add unit tests scaffold (implementation tests in T012).
 - Success criteria:
   - Provider can be mounted in tests and exposes hooks.
 
