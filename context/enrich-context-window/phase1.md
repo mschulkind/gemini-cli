@@ -29,8 +29,8 @@
 | T001    | Add formatTokenCount helper                                                | ✅ Done    | 0.5h      |
 | T002    | Unit tests for formatTokenCount                                            | ✅ Done    | 0.5h      |
 | T003    | Design TokenUsage types & API surface                                      | ✅ Done    | 0.5h      |
-| T004    | Implement TokenUsageContext provider scaffold                              | ⏳ Pending | 1h        |
-| T005    | Hook to read token usage from SessionStats                                 | ⏳ Pending | 0.5h      |
+| T004    | Implement TokenUsageContext provider scaffold                              | ✅ Done    | 1h        |
+| T005    | Hook to read token usage from SessionStats                                 | ✅ Done    | 0.5h      |
 | T006    | Instrument ChatCompressed events                                           | ⏳ Pending | 1h        |
 | T007    | Instrument save_memory handling in handleCompletedTools                    | ⏳ Pending | 0.5h      |
 | T008    | Instrument successful sendMessageStream path to update highWaterMark       | ⏳ Pending | 1h        |
@@ -98,11 +98,13 @@
 
 ### T005 · Implement read hook for token usage (consumer API)
 
-- Status: ⏳ Pending
+- Status: ✅ Done
+- Started: 2025-10-05T21:53:36Z
+- Completed: 2025-10-05T21:54:06Z
 - Est. Time: 0.5h
 - Todo:
-  - [ ] Implement `useTokenUsage()` hook that returns TokenUsage and subscribe updates.
-  - [ ] Add small smoke test to verify default values.
+  - [x] Implement `useTokenUsage()` hook that returns TokenUsage and subscribe updates.
+  - [x] Add small smoke test to verify default values.
 - Success criteria:
   - Hook returns stable default values in test environment.
 
