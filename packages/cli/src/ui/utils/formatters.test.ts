@@ -5,7 +5,11 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { formatDuration, formatMemoryUsage } from './formatters.js';
+import {
+  formatDuration,
+  formatMemoryUsage,
+  formatTokenCount,
+} from './formatters.js';
 
 describe('formatters', () => {
   describe('formatMemoryUsage', () => {
@@ -67,6 +71,28 @@ describe('formatters', () => {
 
     it('should handle negative durations', () => {
       expect(formatDuration(-100)).toBe('0s');
+    });
+  });
+
+  describe('formatTokenCount', () => {
+    it('formats 0 as "0" for both short and full', () => {
+      expect(formatTokenCount(0, false)).toBe('0');
+      expect(formatTokenCount(0, true)).toBe('0');
+    });
+
+    it('formats values below 1000 without shorthand', () => {
+      expect(formatTokenCount(999, false)).toBe('999');
+      expect(formatTokenCount(999, true)).toBe('999');
+    });
+
+    it('formats 1000 as "1.0k" (short) and "1,000" (full)', () => {
+      expect(formatTokenCount(1000, true)).toBe('1.0k');
+      expect(formatTokenCount(1000, false)).toBe('1,000');
+    });
+
+    it('formats 12345 as "12.3k" (short, one decimal) and "12,345" (full)', () => {
+      expect(formatTokenCount(12345, true)).toBe('12.3k');
+      expect(formatTokenCount(12345, false)).toBe('12,345');
     });
   });
 });

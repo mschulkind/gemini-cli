@@ -27,7 +27,7 @@
 | Task ID | Task Name                                                                  | Status     | Est. Time |
 | ------- | -------------------------------------------------------------------------- | ---------- | --------- |
 | T001    | Add formatTokenCount helper                                                | ✅ Done    | 0.5h      |
-| T002    | Unit tests for formatTokenCount                                            | ⏳ Pending | 0.5h      |
+| T002    | Unit tests for formatTokenCount                                            | ✅ Done    | 0.5h      |
 | T003    | Design TokenUsage types & API surface                                      | ⏳ Pending | 0.5h      |
 | T004    | Implement TokenUsageContext provider scaffold                              | ⏳ Pending | 1h        |
 | T005    | Hook to read token usage from SessionStats                                 | ⏳ Pending | 0.5h      |
@@ -60,12 +60,14 @@
 
 ### T002 · Unit tests for formatTokenCount
 
-- Status: ⏳ Pending
+- Status: ✅ Done
+- Started: 2025-10-05T21:38:24Z
+- Completed: 2025-10-05T21:39:44Z
 - Est. Time: 0.5h
 - Todo:
-  - [ ] Add `formatTokenCount` unit tests in `packages/cli/src/ui/utils/formatters.test.ts`.
-  - [ ] Follow TDD: write failing tests first, then implement T001 to make them pass.
-  - [ ] Ensure coverage includes edge cases (0, 999, 1000, 12345).
+  - [x] Add `formatTokenCount` unit tests in `packages/cli/src/ui/utils/formatters.test.ts`.
+  - [x] Follow TDD: write failing tests first, then implement T001 to make them pass.
+  - [x] Ensure coverage includes edge cases (0, 999, 1000, 12345).
 - Success criteria:
   - Tests pass and demonstrate expected short/full formatting.
 
