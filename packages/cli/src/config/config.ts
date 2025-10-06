@@ -31,8 +31,7 @@ import {
   FileDiscoveryService,
   ShellTool,
   EditTool,
-  WRITE_FILE_TOOL_NAME,
-  SHELL_TOOL_NAMES,
+  WriteFileTool,
   resolveTelemetrySettings,
   FatalConfigError,
 } from '@google/gemini-cli-core';
@@ -256,7 +255,6 @@ export async function parseArguments(settings: Settings): Promise<CliArgs> {
           alias: 'e',
           type: 'array',
           string: true,
-          nargs: 1,
           description:
             'A list of extensions to use. If not provided, all extensions are used.',
           coerce: (extensions: string[]) =>
@@ -454,9 +452,9 @@ function createToolExclusionFilter(
 ) {
   return (tool: string): boolean => {
     if (tool === ShellTool.Name) {
-      // If any of the allowed tools is ShellTool (even with subcommands), don't exclude it.
+      // If any of the allowed tools references the ShellTool (including subcommands), don't exclude it.
       return !allowedTools.some((allowed) =>
-        SHELL_TOOL_NAMES.some((shellName) => allowed.startsWith(shellName)),
+        allowed.startsWith(ShellTool.Name),
       );
     }
     return !allowedToolsSet.has(tool);
@@ -606,11 +604,7 @@ export async function loadCliConfig(
   // In non-interactive mode, exclude tools that require a prompt.
   const extraExcludes: string[] = [];
   if (!interactive && !argv.experimentalAcp) {
-    const defaultExcludes = [
-      ShellTool.Name,
-      EditTool.Name,
-      WRITE_FILE_TOOL_NAME,
-    ];
+    const defaultExcludes = [ShellTool.Name, EditTool.Name, WriteFileTool.Name];
     const autoEditExcludes = [ShellTool.Name];
 
     const toolExclusionFilter = createToolExclusionFilter(
@@ -743,8 +737,7 @@ export async function loadCliConfig(
     interactive,
     trustedFolder,
     useRipgrep: settings.tools?.useRipgrep,
-    enableInteractiveShell:
-      settings.tools?.shell?.enableInteractiveShell ?? true,
+    shouldUseNodePtyShell: settings.tools?.shell?.enableInteractiveShell,
     skipNextSpeakerCheck: settings.model?.skipNextSpeakerCheck,
     enablePromptCompletion: settings.general?.enablePromptCompletion ?? false,
     truncateToolOutputThreshold: settings.tools?.truncateToolOutputThreshold,
@@ -768,12 +761,10 @@ export async function loadCliConfig(
   const schema = getSettingsSchema();
   const footerProps =
     (schema.ui?.properties?.footer?.properties as
-      | Record<string, unknown>
+      | Record<string, { default?: boolean }>
       | undefined) ?? undefined;
   const schemaDefaultShowTokenCounts =
-    ((footerProps &&
-      footerProps['showTokenCounts'] &&
-      footerProps['showTokenCounts'].default) as boolean | undefined) ?? false;
+    (footerProps?.['showTokenCounts']?.default as boolean | undefined) ?? false;
   (configInstance as unknown as { showTokenCounts?: boolean }).showTokenCounts =
     settings.ui?.footer?.showTokenCounts ?? schemaDefaultShowTokenCounts;
   return configInstance;
