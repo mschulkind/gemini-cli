@@ -75,4 +75,20 @@ describe('statsCommand', () => {
       expect.any(Number),
     );
   });
+
+  it('should display context stats when using the "context" subcommand', () => {
+    const contextSubCommand = statsCommand.subCommands?.find(
+      (sc) => sc.name === 'context',
+    );
+    if (!contextSubCommand?.action) throw new Error('Subcommand has no action');
+
+    contextSubCommand.action(mockContext, '');
+
+    expect(mockContext.ui.addItem).toHaveBeenCalledWith(
+      {
+        type: MessageType.CONTEXT_STATS,
+      },
+      expect.any(Number),
+    );
+  });
 });

@@ -37,6 +37,7 @@ import {
   FatalConfigError,
 } from '@google/gemini-cli-core';
 import type { Settings } from './settings.js';
+import { getSettingsSchema } from './settingsSchema.js';
 
 import { annotateActiveExtensions } from './extension.js';
 import { getCliVersion } from '../utils/version.js';
@@ -762,8 +763,19 @@ export async function loadCliConfig(
   });
   // Wire the new ui.footer.showTokenCounts setting onto the returned Config instance
   // without modifying core Config types: attach as a runtime-only property.
+  // Prefer an explicit user setting when present; otherwise fall back to the schema
+  // default (so schema-driven defaults are honored even when absent from settings files).
+  const schema = getSettingsSchema();
+  const footerProps =
+    (schema.ui?.properties?.footer?.properties as
+      | Record<string, unknown>
+      | undefined) ?? undefined;
+  const schemaDefaultShowTokenCounts =
+    ((footerProps &&
+      footerProps['showTokenCounts'] &&
+      footerProps['showTokenCounts'].default) as boolean | undefined) ?? false;
   (configInstance as unknown as { showTokenCounts?: boolean }).showTokenCounts =
-    settings.ui?.footer?.showTokenCounts ?? false;
+    settings.ui?.footer?.showTokenCounts ?? schemaDefaultShowTokenCounts;
   return configInstance;
 }
 

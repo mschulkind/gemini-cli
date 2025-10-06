@@ -158,6 +158,11 @@ export const useSlashCommandProcessor = (
         historyItemContent = {
           type: 'tool_stats',
         };
+      } else if (message.type === MessageType.CONTEXT_STATS) {
+        // Context stats are represented as a dedicated history item.
+        historyItemContent = {
+          type: 'context_stats',
+        };
       } else if (message.type === MessageType.QUIT) {
         historyItemContent = {
           type: 'quit',

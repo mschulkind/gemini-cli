@@ -22,6 +22,7 @@ import { AboutBox } from './AboutBox.js';
 import { StatsDisplay } from './StatsDisplay.js';
 import { ModelStatsDisplay } from './ModelStatsDisplay.js';
 import { ToolStatsDisplay } from './ToolStatsDisplay.js';
+import { ContextStatsDisplay } from './ContextStatsDisplay.js';
 import { SessionSummaryDisplay } from './SessionSummaryDisplay.js';
 import { Help } from './Help.js';
 import type { SlashCommand } from '../commands/types.js';
@@ -113,6 +114,7 @@ export const HistoryItemDisplay: React.FC<HistoryItemDisplayProps> = ({
       )}
       {itemForDisplay.type === 'model_stats' && <ModelStatsDisplay />}
       {itemForDisplay.type === 'tool_stats' && <ToolStatsDisplay />}
+      {itemForDisplay.type === 'context_stats' && <ContextStatsDisplay />}
       {itemForDisplay.type === 'quit' && (
         <SessionSummaryDisplay duration={itemForDisplay.duration} />
       )}

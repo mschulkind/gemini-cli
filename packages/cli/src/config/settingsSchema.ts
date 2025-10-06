@@ -378,7 +378,7 @@ const SETTINGS_SCHEMA = {
             label: 'Show Token Counts',
             category: 'UI',
             requiresRestart: false,
-            default: false,
+            default: true,
             description:
               'Display token usage counts in the footer (short or full format per UI).',
             showInDialog: true,

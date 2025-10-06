@@ -141,6 +141,11 @@ export type HistoryItemToolStats = HistoryItemBase & {
   type: 'tool_stats';
 };
 
+export type HistoryItemContextStats = HistoryItemBase & {
+  type: 'context_stats';
+  // Additional fields can be added later as the UI expands what context stats include.
+};
+
 export type HistoryItemQuit = HistoryItemBase & {
   type: 'quit';
   duration: string;
@@ -240,6 +245,7 @@ export type HistoryItemWithoutId =
   | HistoryItemStats
   | HistoryItemModelStats
   | HistoryItemToolStats
+  | HistoryItemContextStats
   | HistoryItemQuit
   | HistoryItemCompression
   | HistoryItemExtensionsList
@@ -260,6 +266,7 @@ export enum MessageType {
   STATS = 'stats',
   MODEL_STATS = 'model_stats',
   TOOL_STATS = 'tool_stats',
+  CONTEXT_STATS = 'context_stats',
   QUIT = 'quit',
   GEMINI = 'gemini',
   COMPRESSION = 'compression',
@@ -306,6 +313,11 @@ export type Message =
     }
   | {
       type: MessageType.TOOL_STATS;
+      timestamp: Date;
+      content?: string;
+    }
+  | {
+      type: MessageType.CONTEXT_STATS;
       timestamp: Date;
       content?: string;
     }

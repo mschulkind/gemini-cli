@@ -67,5 +67,19 @@ export const statsCommand: SlashCommand = {
         );
       },
     },
+    {
+      name: 'context',
+      description:
+        'Show collected context statistics (tokens, windows, cache hits).',
+      kind: CommandKind.BUILT_IN,
+      action: (context: CommandContext) => {
+        context.ui.addItem(
+          {
+            type: MessageType.CONTEXT_STATS,
+          },
+          Date.now(),
+        );
+      },
+    },
   ],
 };

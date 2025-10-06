@@ -90,7 +90,6 @@ import { useSessionStats } from './contexts/SessionContext.js';
 import { useGitBranchName } from './hooks/useGitBranchName.js';
 import { useExtensionUpdates } from './hooks/useExtensionUpdates.js';
 import { ShellFocusContext } from './contexts/ShellFocusContext.js';
-import { Footer } from './components/Footer.js';
 
 const CTRL_EXIT_PROMPT_DURATION_MS = 1000;
 
@@ -574,6 +573,30 @@ Logging in with Google... Please restart Gemini CLI to continue.
 
   const cancelHandlerRef = useRef<() => void>(() => {});
 
+  // Create a proxy that preserves all config properties and binds function
+  // members to the original config instance so downstream code can safely call
+  // methods like getToolRegistry(), getProjectRoot(), etc.
+  const boundConfig = useMemo(() => {
+    const handler: ProxyHandler<Record<string, unknown>> = {
+      get(target: Record<string, unknown>, prop: string | symbol, _receiver) {
+        const val = (config as unknown as Record<string, unknown>)[
+          prop as string
+        ];
+        if (typeof val === 'function') {
+          return (val as (...args: unknown[]) => unknown).bind(config);
+        }
+        return val;
+      },
+      has(target: Record<string, unknown>, prop: string | symbol) {
+        return prop in (config as unknown as Record<string, unknown>);
+      },
+    };
+    return new Proxy(
+      config as unknown as Record<string, unknown>,
+      handler,
+    ) as unknown as Config;
+  }, [config]);
+
   const {
     streamingState,
     submitQuery,
@@ -588,7 +611,7 @@ Logging in with Google... Please restart Gemini CLI to continue.
     config.getGeminiClient(),
     historyManager.history,
     historyManager.addItem,
-    config,
+    boundConfig,
     settings,
     setDebugMessage,
     handleSlashCommand,
@@ -1309,10 +1332,7 @@ Logging in with Google... Please restart Gemini CLI to continue.
             }}
           >
             <ShellFocusContext.Provider value={isFocused}>
-              <>
-                <App />
-                <Footer />
-              </>
+              <App />
             </ShellFocusContext.Provider>
           </AppContext.Provider>
         </ConfigContext.Provider>
