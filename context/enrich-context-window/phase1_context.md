@@ -18,3 +18,5 @@ Working on T001..T015 from phase1 task list; this file records any higher-level 
 - 2025-10-05T21:59:22Z · Instrumented ChatCompressed handling to update TokenUsage fields; files touched: packages/cli/src/ui/hooks/useGeminiStream.ts, packages/cli/src/ui/hooks/useGeminiStream.compressed.test.ts
 - 2025-10-05T22:47:02Z · Fixed T006 test syntax and ensured TokenUsageProvider wrapping in tests (T006).
 - 2025-10-05T22:50:01Z · Instrumented ChatCompressed handling to update TokenUsage fields; files: packages/cli/src/ui/hooks/useGeminiStream.ts, packages/cli/src/ui/hooks/useGeminiStream.compressed.test.ts
+- 2025-10-05T23:29:30Z · Stabilized instrumentation types and tests: tightened useGeminiStream types, stabilized tokenUsageApi usage via ref, and marked T007 done.
+- 2025-10-06T01:25:09Z · Tightened local instrumentation types (ChatCompressedPayload, SaveMemoryResult), added defensive parsing and test wrappers to stabilize unit tests (T006/T007).

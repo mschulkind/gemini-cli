@@ -44,7 +44,7 @@ const DEFAULT_TOKEN_USAGE: ReadonlyTokenUsage = {
   lastSuccessfulRequestTokenCount: null,
 };
 
-const ApiContext = createContext<TokenUsageApi | undefined>(undefined);
+export const ApiContext = createContext<TokenUsageApi | undefined>(undefined);
 const SnapshotContext = createContext<ReadonlyTokenUsage | undefined>(
   undefined,
 );

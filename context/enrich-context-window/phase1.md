@@ -31,8 +31,8 @@
 | T003    | Design TokenUsage types & API surface                                      | ✅ Done        | 0.5h      |
 | T004    | Implement TokenUsageContext provider scaffold                              | ✅ Done        | 1h        |
 | T005    | Hook to read token usage from SessionStats                                 | ✅ Done        | 0.5h      |
-| T006    | Instrument ChatCompressed events                                           | ⏳ In Progress | 1h        |
-| T007    | Instrument save_memory handling in handleCompletedTools                    | ⏳ Pending     | 0.5h      |
+| T006    | Instrument ChatCompressed events                                           | ✅ Done        | 1h        |
+| T007    | Instrument save_memory handling in handleCompletedTools                    | ✅ Done        | 0.5h      |
 | T008    | Instrument successful sendMessageStream path to update highWaterMark       | ⏳ Pending     | 1h        |
 | T009    | Footer UI: render used / limit + high-water + compression threshold        | ⏳ Pending     | 1h        |
 | T010    | Accessibility: expose full values to screen readers                        | ⏳ Pending     | 0.5h      |
@@ -122,14 +122,16 @@
   - Emitting a ChatCompressed message updates TokenUsageContext values in test runs.
 
 ### T007 · Instrument save_memory handling in handleCompletedTools
-
-- Status: ⏳ Pending
-- Est. Time: 0.5h
-- Todo:
-  - [ ] Update `handleCompletedTools` path where `save_memory` is processed to update memoryTokens.
-  - [ ] Ensure asynchronous completion updates context promptly.
-- Success criteria:
-  - Memory save flows cause TokenUsageContext.memoryTokens to update in tests.
+ 
+ - Status: ✅ Done
+ - Started: 2025-10-05T23:12:48Z
+ - Completed: 2025-10-05T23:29:30Z
+ - Est. Time: 0.5h
+ - Todo:
+   - [x] Update `handleCompletedTools` path where `save_memory` is processed to update memoryTokens.
+   - [x] Ensure asynchronous completion updates context promptly.
+ - Success criteria:
+   - Memory save flows cause TokenUsageContext.memoryTokens to update in tests.
 
 ### T008 · Instrument successful sendMessageStream path to update highWaterMark
 

@@ -5,11 +5,13 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import React from 'react';
 import type { Mock, MockInstance } from 'vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useGeminiStream } from './useGeminiStream.js';
 import { useKeypress } from './useKeypress.js';
+import { TokenUsageProvider } from '../TokenUsageContext.js';
 import * as atCommandProcessor from './atCommandProcessor.js';
 import type {
   TrackedToolCall,
@@ -311,6 +313,8 @@ describe('useGeminiStream', () => {
         );
       },
       {
+        wrapper: ({ children }) =>
+          React.createElement(TokenUsageProvider, null, children),
         initialProps: {
           client,
           history: [],

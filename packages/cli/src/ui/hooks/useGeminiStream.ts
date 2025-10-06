@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo, useContext } from 'react';
 import type {
   Config,
   EditorType,
@@ -62,7 +62,7 @@ import {
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { useSessionStats } from '../contexts/SessionContext.js';
-import { useTokenUsageApi } from '../TokenUsageContext.js';
+import { ApiContext, type TokenUsageApi, type ReadonlyTokenUsage } from '../TokenUsageContext.js';
 import { useKeypress } from './useKeypress.js';
 import type { LoadedSettings } from '../../config/settings.js';
 
@@ -73,6 +73,27 @@ enum StreamProcessingStatus {
 }
 
 const EDIT_TOOL_NAMES = new Set(['replace', WRITE_FILE_TOOL_NAME]);
+
+/**
+ * Local, narrow types for instrumentation payloads used within this file.
+ * These are intentionally minimal and only include the fields exercised by
+ * the hook's runtime logic and tests.
+ */
+type ChatCompressedPayload = {
+  originalTokenCount?: number;
+  newTokenCount?: number;
+  compressionThreshold?: number;
+};
+
+type SaveMemoryResult = {
+  memoryTokens?: number;
+  memory_token_count?: number;
+  tokenCount?: number;
+  totalTokens?: number;
+  total_token_count?: number;
+  // allow other unknown properties without widening callers
+  [key: string]: unknown;
+};
 
 function showCitations(settings: LoadedSettings): boolean {
   const enabled = settings?.merged?.ui?.showCitations;
@@ -118,7 +139,12 @@ export const useGeminiStream = (
     useStateAndRef<HistoryItemWithoutId | null>(null);
   const processedMemoryToolsRef = useRef<Set<string>>(new Set());
   const { startNewPrompt, getPromptCount } = useSessionStats();
-  const tokenUsageApi = useTokenUsageApi();
+  // Read TokenUsage API via context if available; keep a stable ref for callbacks.
+  const tokenUsageApi = useContext(ApiContext) as TokenUsageApi | undefined;
+  const tokenUsageApiRef = useRef<TokenUsageApi | undefined>(tokenUsageApi);
+  useEffect(() => {
+    tokenUsageApiRef.current = tokenUsageApi;
+  }, [tokenUsageApi]);
   const storage = config.storage;
   const logger = useLogger(storage);
   const gitService = useMemo(() => {
@@ -618,35 +644,45 @@ export const useGeminiStream = (
       // - compressionThreshold <- event.compressionThreshold (if present)
       // - lastSuccessfulRequestTokenCount <- event.originalTokenCount (store original count as a sensible existing field)
       try {
-        // Read compressionThreshold defensively because the runtime payload may include it
-        // even if the TypeScript definition does not. Prefer the event value when present,
-        // otherwise retain existing value from the token usage snapshot.
+        // Narrow the event payload to a local type for safer access.
+        const payload = eventValue as unknown as ChatCompressedPayload;
+  
+        // Prefer the value from the event when present; otherwise read the
+        // current value from the TokenUsage snapshot (if available).
         const compressionThresholdFromEvent =
-          (eventValue as unknown as { compressionThreshold?: number })
-            .compressionThreshold ?? tokenUsageApi.get().compressionThreshold;
-
-        // Map the compressed/new token count into the existing lastSuccessfulRequestTokenCount
-        // field per design. If newTokenCount is absent, set to null to indicate unknown.
+          payload.compressionThreshold ??
+          tokenUsageApiRef.current?.get?.().compressionThreshold;
+  
+        // newTokenCount may be absent from some payloads; normalize to null
+        // to indicate the count is unknown in that case.
         const compressedNewCount =
-          (eventValue as unknown as { newTokenCount?: number }).newTokenCount ??
-          null;
-
-        tokenUsageApi?.update?.({
-          compressionThreshold: compressionThresholdFromEvent,
-          lastSuccessfulRequestTokenCount: compressedNewCount,
-        });
+          payload.newTokenCount ?? null;
+  
+        // Apply partial update via the stable ref; guard with try/catch so
+        // instrumentation cannot destabilize the UX or tests.
+        try {
+          tokenUsageApiRef.current?.update?.({
+            compressionThreshold: compressionThresholdFromEvent,
+            lastSuccessfulRequestTokenCount: compressedNewCount,
+          });
+        } catch {
+          // Swallow instrumentation errors to avoid affecting UX.
+        }
       } catch {
-        // Swallow errors in instrumentation to avoid affecting UX.
+        // Defensive: if anything unexpected happens while reading the event,
+        // do not let it bubble up.
       }
-
+  
+      // Use the narrowed payload for user-visible message formatting too.
+      const payloadForMsg = eventValue as unknown as ChatCompressedPayload;
       return addItem(
         {
           type: 'info',
           text:
             `IMPORTANT: This conversation approached the input token limit for ${config.getModel()}. ` +
             `A compressed context will be sent for future messages (compressed from: ` +
-            `${eventValue?.originalTokenCount ?? 'unknown'} to ` +
-            `${eventValue?.newTokenCount ?? 'unknown'} tokens).`,
+            `${payloadForMsg.originalTokenCount ?? 'unknown'} to ` +
+            `${payloadForMsg.newTokenCount ?? 'unknown'} tokens).`,
         },
         Date.now(),
       );
@@ -656,7 +692,6 @@ export const useGeminiStream = (
       config,
       pendingHistoryItemRef,
       setPendingHistoryItem,
-      tokenUsageApi,
     ],
   );
 
@@ -1029,10 +1064,91 @@ export const useGeminiStream = (
           t.status === 'success' &&
           !processedMemoryToolsRef.current.has(t.request.callId),
       );
-
+      
       if (newSuccessfulMemorySaves.length > 0) {
         // Perform the refresh only if there are new ones.
         void performMemoryRefresh();
+        // Instrumentation: attempt to extract token counts from the tool responses
+        // and update the TokenUsage context so the UI can reflect memory sizing.
+        try {
+          for (const t of newSuccessfulMemorySaves) {
+            // Defensive extraction: support several possible shapes for returned counts.
+            const response = (t as unknown as { response?: unknown }).response;
+            let memoryTokensFromTool: number | undefined = undefined;
+            let overallTokenCount: number | undefined = undefined;
+    
+            // Handle array shape e.g. [ { memoryTokens: 123 } ]
+            if (Array.isArray(response) && response.length === 1) {
+              const first = response[0];
+              if (first && typeof first === 'object') {
+                const f = first as SaveMemoryResult;
+                if (typeof f.memoryTokens === 'number') {
+                  memoryTokensFromTool = f.memoryTokens;
+                }
+                if (typeof f.memory_token_count === 'number') {
+                  memoryTokensFromTool = f.memory_token_count;
+                }
+                if (typeof f.tokenCount === 'number') {
+                  overallTokenCount = f.tokenCount;
+                }
+                if (typeof f.totalTokens === 'number') {
+                  overallTokenCount = f.totalTokens;
+                }
+                if (typeof f.total_token_count === 'number') {
+                  overallTokenCount = f.total_token_count;
+                }
+              }
+            } else if (response && typeof response === 'object') {
+              const r = response as SaveMemoryResult;
+              if (typeof r.memoryTokens === 'number') {
+                memoryTokensFromTool = r.memoryTokens;
+              }
+              if (typeof r.memory_token_count === 'number') {
+                memoryTokensFromTool = r.memory_token_count;
+              }
+              if (typeof r.tokenCount === 'number') {
+                overallTokenCount = r.tokenCount;
+              }
+              if (typeof r.totalTokens === 'number') {
+                overallTokenCount = r.totalTokens;
+              }
+              if (typeof r.total_token_count === 'number') {
+                overallTokenCount = r.total_token_count;
+              }
+            }
+    
+            // Final fallback: try to parse a number from the resultDisplay string.
+            if (memoryTokensFromTool === undefined) {
+              const display = (t as unknown as { response?: { resultDisplay?: unknown } })?.response?.resultDisplay;
+              if (typeof display === 'string') {
+                const m = display.match(/(\d{1,7})/);
+                if (m) {
+                  const parsed = Number(m[1]);
+                  if (!Number.isNaN(parsed)) memoryTokensFromTool = parsed;
+                }
+              }
+            }
+    
+            const updatePayload: Partial<ReadonlyTokenUsage> = {};
+            if (memoryTokensFromTool !== undefined) {
+              updatePayload.memoryTokens = memoryTokensFromTool;
+            }
+            if (overallTokenCount !== undefined) {
+              updatePayload.lastSuccessfulRequestTokenCount = overallTokenCount;
+            }
+    
+            if (Object.keys(updatePayload).length > 0) {
+              try {
+                tokenUsageApiRef.current?.update?.(updatePayload);
+              } catch {
+                // Swallow errors to avoid affecting UX.
+              }
+            }
+          }
+        } catch {
+          // Swallow instrumentation errors.
+        }
+    
         // Mark them as processed so we don't do this again on the next render.
         newSuccessfulMemorySaves.forEach((t) =>
           processedMemoryToolsRef.current.add(t.request.callId),
