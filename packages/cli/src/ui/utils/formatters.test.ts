@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { formatTokenCount } from './formatters';
+import { formatTokenCount } from './formatters.js';
 
 describe('formatTokenCount', () => {
   it('returns "0" for zero', () => {

@@ -9,7 +9,7 @@ import {
   TokenUsageProvider,
   useTokenUsage,
   useTokenUsageApi,
-} from '../../TokenUsageContext';
+} from '../TokenUsageContext.js';
 
 function Probe() {
   const usage = useTokenUsage();

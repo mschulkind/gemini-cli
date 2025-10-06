@@ -12,6 +12,10 @@ import {
   useTokenUsage,
   useTokenUsageApi,
 } from '../TokenUsageContext.js';
+import type {
+  TokenUsageApi,
+  ReadonlyTokenUsage,
+} from '../TokenUsageContext.js';
 
 function Probe({
   usageRef,
@@ -57,7 +61,7 @@ describe('TokenUsageContext (behavior tests)', () => {
       </TokenUsageProvider>,
     );
 
-    const api = apiRef.current!;
+    const api = apiRef.current as unknown as TokenUsageApi;
     const cb = vi.fn();
     // subscribe should invoke immediately with current snapshot
     const unsubscribe = api.subscribe(cb);
@@ -73,7 +77,9 @@ describe('TokenUsageContext (behavior tests)', () => {
     expect(cb.mock.calls[1][0].highWaterMark).toBe(900);
 
     // consumer hook snapshot should reflect update (render triggered)
-    expect(usageRef.current!.highWaterMark).toBe(900);
+    expect(
+      (usageRef.current as unknown as ReadonlyTokenUsage)!.highWaterMark,
+    ).toBe(900);
 
     // unsubscribe and ensure no further notifications
     unsubscribe();
@@ -84,6 +90,8 @@ describe('TokenUsageContext (behavior tests)', () => {
 
     expect(cb).toHaveBeenCalledTimes(2);
     // usageRef should still reflect latest update because consumer hook updates on provider render
-    expect(usageRef.current!.highWaterMark).toBe(1000);
+    expect(
+      (usageRef.current as unknown as ReadonlyTokenUsage)!.highWaterMark,
+    ).toBe(1000);
   });
 });

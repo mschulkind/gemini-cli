@@ -54,7 +54,7 @@ function TestApp({
   };
 }) {
   const history: unknown[] = [];
-  const addItem = (_item: unknown, _ts?: number) => {};
+  const addItem = (_item: unknown, _ts?: number) => 0;
   const config = {
     getModel: () => 'test-model',
     setQuotaErrorOccurred: (_b: boolean) => {},

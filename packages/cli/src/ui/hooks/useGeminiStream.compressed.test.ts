@@ -16,6 +16,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, test, expect } from 'vitest';
 import { TokenUsageProvider, useTokenUsage } from '../TokenUsageContext.js';
 import { SessionStatsProvider } from '../contexts/SessionContext.js';
+import type { Config } from '@google/gemini-cli-core';
 import { useGeminiStream } from './useGeminiStream.js';
 
 function Inner() {

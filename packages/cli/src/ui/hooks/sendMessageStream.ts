@@ -40,7 +40,7 @@ export function estimateTokenCount(query: PartListUnion): number | null {
     for (const p of query as Part[]) {
       // Part shapes vary; attempt to read common text-like fields.
       const pRec = p as unknown as Record<string, unknown>;
-      const maybeText = pRec.text ?? pRec.value ?? pRec.content;
+      const maybeText = pRec['text'] ?? pRec['value'] ?? pRec['content'];
       if (typeof maybeText === 'string') {
         chars += maybeText.length;
       }
