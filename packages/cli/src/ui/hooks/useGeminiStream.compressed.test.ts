@@ -4,10 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @vitest-environment jsdom
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useEffect } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, test, expect } from 'vitest';
 import { TokenUsageProvider, useTokenUsage } from '../TokenUsageContext.js';
+import { SessionStatsProvider } from '../contexts/SessionContext.js';
 import { useGeminiStream } from './useGeminiStream.js';
 
 function Inner() {
@@ -30,11 +38,26 @@ function Inner() {
     ...args: unknown[]
   ) => unknown;
 
+  const stubConfig = {
+    getModel: () => 'test-model',
+    setQuotaErrorOccurred: (_b: boolean) => {},
+    getContentGeneratorConfig: () => ({ authType: 'none' as const }),
+    getSessionId: () => 'sess',
+    getMaxSessionTurns: () => 10,
+    getCheckpointingEnabled: () => false,
+    // Minimal additions required by internal initialization paths (tool scheduler, git service).
+    getToolRegistry: () => ({}),
+    getProjectRoot: () => undefined,
+    storage: {
+      getProjectTempCheckpointsDir: () => null,
+    },
+  } as unknown as Config;
+
   const streamHook = callUseGeminiStream(
     {} as unknown, // geminiClient
     [] as unknown, // history
     (() => {}) as unknown, // addItem
-    {} as unknown, // config
+    stubConfig, // config
     {} as unknown, // settings
     (() => {}) as unknown, // onDebugMessage
     (async () => false) as unknown, // handleSlashCommand
@@ -75,9 +98,13 @@ describe('useGeminiStream compressed instrumentation (smoke)', () => {
   test('updates TokenUsage via provider when compression event occurs', async () => {
     render(
       React.createElement(
-        TokenUsageProvider,
+        SessionStatsProvider,
         null,
-        React.createElement(Inner, null),
+        React.createElement(
+          TokenUsageProvider,
+          null,
+          React.createElement(Inner, null),
+        ),
       ),
     );
 

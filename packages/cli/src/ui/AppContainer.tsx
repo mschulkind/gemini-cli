@@ -90,6 +90,7 @@ import { useSessionStats } from './contexts/SessionContext.js';
 import { useGitBranchName } from './hooks/useGitBranchName.js';
 import { useExtensionUpdates } from './hooks/useExtensionUpdates.js';
 import { ShellFocusContext } from './contexts/ShellFocusContext.js';
+import { Footer } from './Footer.js';
 
 const CTRL_EXIT_PROMPT_DURATION_MS = 1000;
 
@@ -1308,7 +1309,10 @@ Logging in with Google... Please restart Gemini CLI to continue.
             }}
           >
             <ShellFocusContext.Provider value={isFocused}>
-              <App />
+              <>
+                <App />
+                <Footer settings={settings} terminalWidth={terminalWidth} sessionStats={sessionStats} />
+              </>
             </ShellFocusContext.Provider>
           </AppContext.Provider>
         </ConfigContext.Provider>

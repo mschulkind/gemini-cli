@@ -16,7 +16,7 @@ function TestApp() {
   React.useEffect(() => {
     // Simulate a save_memory tool completing with returned token counts.
     api.update({ memoryTokens: 789, lastSuccessfulRequestTokenCount: 1000 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [api]);
 
   // Use React.createElement to avoid JSX parsing issues in .ts files.
@@ -46,7 +46,7 @@ test('save_memory updates TokenUsage.memoryTokens', async () => {
         // swallow
       }
       if (Date.now() - start > timeout) throw new Error('Timed out waiting for condition');
-      // eslint-disable-next-line no-await-in-loop
+       
       await new Promise((r) => setTimeout(r, 20));
     }
   }

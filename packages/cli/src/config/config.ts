@@ -684,7 +684,7 @@ export async function loadCliConfig(
     argv.screenReader !== undefined
       ? argv.screenReader
       : (settings.ui?.accessibility?.screenReader ?? false);
-  return new Config({
+  const configInstance = new Config({
     sessionId,
     embeddingModel: DEFAULT_GEMINI_EMBEDDING_MODEL,
     sandbox: sandboxConfig,
@@ -760,6 +760,11 @@ export async function loadCliConfig(
       settings.tools?.enableMessageBusIntegration ?? false,
     enableSubagents: settings.experimental?.enableSubagents ?? false,
   });
+  // Wire the new ui.footer.showTokenCounts setting onto the returned Config instance
+  // without modifying core Config types: attach as a runtime-only property.
+  (configInstance as any).showTokenCounts =
+    settings.ui?.footer?.showTokenCounts ?? false;
+  return configInstance;
 }
 
 function allowedMcpServers(

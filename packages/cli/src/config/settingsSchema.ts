@@ -373,6 +373,16 @@ const SETTINGS_SCHEMA = {
             description: 'Hide the model name and context usage in the footer.',
             showInDialog: true,
           },
+          showTokenCounts: {
+            type: 'boolean',
+            label: 'Show Token Counts',
+            category: 'UI',
+            requiresRestart: false,
+            default: false,
+            description:
+              'Display token usage counts in the footer (short or full format per UI).',
+            showInDialog: true,
+          },
         },
       },
       hideFooter: {

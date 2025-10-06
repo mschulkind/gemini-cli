@@ -1,5 +1,8 @@
 # Enrich context window · Task List (entire plan)
 
+Do NOT commit or push files in context/ — context/ is gitignored.
+This update reflects workspace changes only; follow repo commit guidelines when preparing a commit.
+
 > Source plan: [`plans/enrich-context-window.md`](plans/enrich-context-window.md:1)
 
 ## Purpose
@@ -33,14 +36,14 @@
 | T005    | Hook to read token usage from SessionStats                                 | ✅ Done        | 0.5h      |
 | T006    | Instrument ChatCompressed events                                           | ✅ Done        | 1h        |
 | T007    | Instrument save_memory handling in handleCompletedTools                    | ✅ Done        | 0.5h      |
-| T008    | Instrument successful sendMessageStream path to update highWaterMark       | ⏳ Pending     | 1h        |
-| T009    | Footer UI: render used / limit + high-water + compression threshold        | ⏳ Pending     | 1h        |
-| T010    | Accessibility: expose full values to screen readers                        | ⏳ Pending     | 0.5h      |
-| T011    | Add settings ui.footer.showTokenCounts and wire to config                  | ⏳ Pending     | 1h        |
-| T012    | Unit tests for TokenUsageContext behavior                                  | ⏳ Pending     | 1h        |
-| T013    | Integration test: ChatCompressed -> SessionStats updates -> footer renders | ⏳ Pending     | 1h        |
-| T014    | Integration test: successful API response updates highWaterMark            | ⏳ Pending     | 1h        |
-| T015    | Docs: short note in docs/cli describing new setting                        | ⏳ Pending     | 0.5h      |
+| T008    | Instrument successful sendMessageStream path to update highWaterMark       | ✅ Done        | 1h        |
+| T009    | Footer UI: render used / limit + high-water + compression threshold        | ✅ Done        | 1h        |
+| T010    | Accessibility: expose full values to screen readers                        | ✅ Done        | 0.5h      |
+| T011    | Add settings ui.footer.showTokenCounts and wire to config                  | ✅ Done        | 1h        |
+| T012    | Unit tests for TokenUsageContext behavior                                  | ✅ Done        | 1h        |
+| T013    | Integration test: ChatCompressed -> SessionStats updates -> footer renders | ✅ Done        | 1h        |
+| T014    | Integration test: successful API response updates highWaterMark            | ✅ Done        | 1h        |
+| T015    | Docs: short note in docs/cli describing new setting                        | ⏳ In Progress | 0.5h      |
 
 ## Tasks (detailed)
 
@@ -135,7 +138,7 @@
 
 ### T008 · Instrument successful sendMessageStream path to update highWaterMark
 
-- Status: ⏳ Pending
+- Status: ✅ Done
 - Est. Time: 1h
 - Todo:
   - [ ] Identify success resolution point for `sendMessageStream` and record token count sent.
@@ -146,7 +149,7 @@
 
 ### T009 · Footer UI rendering
 
-- Status: ⏳ Pending
+- Status: ✅ Done
 - Est. Time: 1h
 - Todo:
   - [ ] Update `AppContainer` or small footer component (`packages/cli/src/ui/AppContainer.tsx`) to read `useTokenUsage()` and render:
@@ -158,7 +161,7 @@
 
 ### T010 · Accessibility: screen-reader values
 
-- Status: ⏳ Pending
+- Status: ✅ Done
 - Est. Time: 0.5h
 - Todo:
   - [ ] Ensure visible shorthand is accompanied by aria-label or visually-hidden element with full integer forms.
@@ -168,7 +171,7 @@
 
 ### T011 · Settings: add and wire ui.footer.showTokenCounts
 
-- Status: ⏳ Pending
+- Status: ✅ Done
 - Est. Time: 1h
 - Todo:
   - [ ] Add boolean setting in [`packages/cli/src/config/settingsSchema.ts`](packages/cli/src/config/settingsSchema.ts:337) (showInDialog: true).
@@ -179,7 +182,7 @@
 
 ### T012 · Unit tests for TokenUsageContext behavior
 
-- Status: ⏳ Pending
+- Status: ✅ Done
 - Est. Time: 1h
 - Todo:
   - [ ] Tests for state updates, subscription, and initial defaults.
@@ -189,7 +192,7 @@
 
 ### T013 · Integration test: ChatCompressed -> SessionStats -> footer render
 
-- Status: ⏳ Pending
+- Status: ✅ Done
 - Est. Time: 1h
 - Todo:
   - [ ] Simulate a ChatCompressed event in `useGeminiStream` tests and assert TokenUsageContext updates and footer reflects new values.
@@ -199,7 +202,7 @@
 
 ### T014 · Integration test: successful API response updates highWaterMark
 
-- Status: ⏳ Pending
+- Status: ✅ Done
 - Est. Time: 1h
 - Todo:
   - [ ] Simulate successful sendMessageStream resolving with token count and assert highWaterMark update and footer display.
@@ -208,7 +211,7 @@
 
 ### T015 · Docs: docs/cli note
 
-- Status: ⏳ Pending
+- Status: ⏳ In Progress
 - Est. Time: 0.5h
 - Todo:
   - [ ] Add short docs note in docs/cli describing `ui.footer.showTokenCounts` and expected behavior (shorthand vs full, accessibility).
@@ -229,3 +232,7 @@
 
 - Start with T001 and T002 (format helper + tests). Proceed sequentially through listed tasks.
 - Update this checklist with progress updates using the repository `context/` checklist guidelines.
+
+## Changelog
+
+2025-10-06: Updated progress table to mark T001–T014 completed; marked T015 in progress. Workspace-only changes, no commits.

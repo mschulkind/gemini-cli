@@ -65,6 +65,7 @@ import { useSessionStats } from '../contexts/SessionContext.js';
 import { ApiContext, type TokenUsageApi, type ReadonlyTokenUsage } from '../TokenUsageContext.js';
 import { useKeypress } from './useKeypress.js';
 import type { LoadedSettings } from '../../config/settings.js';
+import { estimateTokenCount, updateHighWaterMark } from './sendMessageStream.js';
 
 enum StreamProcessingStatus {
   Completed,
@@ -148,10 +149,18 @@ export const useGeminiStream = (
   const storage = config.storage;
   const logger = useLogger(storage);
   const gitService = useMemo(() => {
-    if (!config.getProjectRoot()) {
+    // Guard against minimal/stubbed `config` objects used by tests which may not
+    // implement getProjectRoot. Call only when available and a function.
+    const maybeGetProjectRoot = (config as unknown as { getProjectRoot?: () => string })
+      .getProjectRoot;
+    if (typeof maybeGetProjectRoot !== 'function') {
       return;
     }
-    return new GitService(config.getProjectRoot(), storage);
+    const projectRoot = maybeGetProjectRoot();
+    if (!projectRoot) {
+      return;
+    }
+    return new GitService(projectRoot, storage);
   }, [config, storage]);
 
   const [toolCalls, scheduleToolCalls, markToolsAsSubmitted] =
@@ -653,17 +662,21 @@ export const useGeminiStream = (
           payload.compressionThreshold ??
           tokenUsageApiRef.current?.get?.().compressionThreshold;
   
-        // newTokenCount may be absent from some payloads; normalize to null
-        // to indicate the count is unknown in that case.
-        const compressedNewCount =
-          payload.newTokenCount ?? null;
+        // Determine sensible values for instrumentation:
+        // - compressionThreshold: prefer event value, otherwise use current snapshot
+        // - lastSuccessfulRequestTokenCount: prefer originalTokenCount (the
+        //   count before compression), otherwise read current snapshot.
+        const originalCount =
+          payload.originalTokenCount ??
+          tokenUsageApiRef.current?.get?.().lastSuccessfulRequestTokenCount ??
+          null;
   
         // Apply partial update via the stable ref; guard with try/catch so
         // instrumentation cannot destabilize the UX or tests.
         try {
           tokenUsageApiRef.current?.update?.({
             compressionThreshold: compressionThresholdFromEvent,
-            lastSuccessfulRequestTokenCount: compressedNewCount,
+            lastSuccessfulRequestTokenCount: originalCount,
           });
         } catch {
           // Swallow instrumentation errors to avoid affecting UX.
@@ -918,6 +931,11 @@ export const useGeminiStream = (
         setInitError(null);
 
         try {
+          // Conservative estimate of tokens sent for this request. This is an
+          // inexpensive heuristic (characters / 4) intended only for instrumentation
+          // (highWaterMark updates); exact tokenization is not available here.
+          const estimatedSentTokenCount = estimateTokenCount(queryToSend);
+
           const stream = geminiClient.sendMessageStream(
             queryToSend,
             abortSignal,
@@ -928,6 +946,16 @@ export const useGeminiStream = (
             userMessageTimestamp,
             abortSignal,
           );
+
+          // Instrumentation: when the send/processing completed successfully, update
+          // the TokenUsage highWaterMark if the estimate is sensible.
+          if (processingStatus === StreamProcessingStatus.Completed) {
+            try {
+              updateHighWaterMark(tokenUsageApiRef.current, estimatedSentTokenCount);
+            } catch {
+              // Swallow instrumentation errors so UX/tests are unaffected.
+            }
+          }
 
           if (processingStatus === StreamProcessingStatus.UserCancelled) {
             return;

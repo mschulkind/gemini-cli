@@ -1,10 +1,16 @@
-import React from 'react';
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import * as React from 'react';
 import { test } from 'vitest';
 import { renderWithProviders as render } from '../../test-utils/render.js';
+import type { Config, LoadedSettings, GeminiClient } from '@google/gemini-cli-core';
 import { TokenUsageProvider, useTokenUsage } from '../TokenUsageContext.js';
 import { SessionStatsProvider } from '../contexts/SessionContext.js';
 import { useGeminiStream } from './useGeminiStream.js';
-import type { GeminiClient } from '@google/gemini-cli-core';
 import { GeminiEventType as ServerGeminiEventType } from '@google/gemini-cli-core';
 
 function makeMockGeminiClient(eventValue: {
@@ -42,11 +48,17 @@ function TestApp({
     getSessionId: () => 'sess',
     getMaxSessionTurns: () => 10,
     getCheckpointingEnabled: () => false,
-  };
+    // Minimal stubs required by internal initialization paths used in hooks.
+    getToolRegistry: () => ({}),
+    getProjectRoot: () => undefined,
+    storage: {
+      getProjectTempCheckpointsDir: () => null,
+    },
+  } as unknown as Config;
   const settings: unknown = {};
   const stream = useGeminiStream(
     client as unknown as GeminiClient,
-    history as unknown as import('../types.js').HistoryItem[],
+    history as unknown as Array<import('../types.js').HistoryItem>,
     addItem as any,
     config as unknown as Config,
     settings as unknown as LoadedSettings,
@@ -68,7 +80,7 @@ function TestApp({
   React.useEffect(() => {
     // Call the compression handler directly to exercise instrumentation deterministically.
     if (eventValue) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+       
       Promise.resolve().then(() =>
         // use a numeric timestamp similar to real usage
         stream.handleChatCompressionEvent(eventValue as any, Date.now()),
@@ -90,7 +102,7 @@ async function waitForCondition(predicate: () => boolean, timeout = 2000) {
       // swallow
     }
     if (Date.now() - start > timeout) throw new Error('Timed out waiting for condition');
-    // eslint-disable-next-line no-await-in-loop
+     
     await new Promise((r) => setTimeout(r, 20));
   }
 }
