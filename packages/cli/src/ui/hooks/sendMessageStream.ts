@@ -16,7 +16,10 @@
  * by useGeminiStream instrumentation (T008).
  */
 import type { PartListUnion, Part } from '@google/genai';
-import type { TokenUsageApi, ReadonlyTokenUsage } from '../TokenUsageContext.js';
+import type {
+  TokenUsageApi,
+  ReadonlyTokenUsage,
+} from '../TokenUsageContext.js';
 
 /**
  * Estimate token count for a query. This is a cheap heuristic used only for
@@ -36,7 +39,8 @@ export function estimateTokenCount(query: PartListUnion): number | null {
     let chars = 0;
     for (const p of query as Part[]) {
       // Part shapes vary; attempt to read common text-like fields.
-      const maybeText = (p as any).text ?? (p as any).value ?? (p as any).content;
+      const pRec = p as unknown as Record<string, unknown>;
+      const maybeText = pRec.text ?? pRec.value ?? pRec.content;
       if (typeof maybeText === 'string') {
         chars += maybeText.length;
       }
@@ -63,7 +67,11 @@ export function updateHighWaterMark(
 ): void {
   if (!tokenUsageApi) return;
   if (sentCount === null || sentCount === undefined) return;
-  if (typeof sentCount !== 'number' || Number.isNaN(sentCount) || sentCount < 0) {
+  if (
+    typeof sentCount !== 'number' ||
+    Number.isNaN(sentCount) ||
+    sentCount < 0
+  ) {
     return;
   }
 

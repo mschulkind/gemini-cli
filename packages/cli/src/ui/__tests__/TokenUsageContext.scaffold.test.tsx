@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TokenUsageProvider, useTokenUsage, useTokenUsageApi } from '../../TokenUsageContext';
+import {
+  TokenUsageProvider,
+  useTokenUsage,
+  useTokenUsageApi,
+} from '../../TokenUsageContext';
 
 function Probe() {
   const usage = useTokenUsage();

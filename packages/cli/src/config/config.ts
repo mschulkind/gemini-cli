@@ -762,7 +762,7 @@ export async function loadCliConfig(
   });
   // Wire the new ui.footer.showTokenCounts setting onto the returned Config instance
   // without modifying core Config types: attach as a runtime-only property.
-  (configInstance as any).showTokenCounts =
+  (configInstance as unknown as { showTokenCounts?: boolean }).showTokenCounts =
     settings.ui?.footer?.showTokenCounts ?? false;
   return configInstance;
 }

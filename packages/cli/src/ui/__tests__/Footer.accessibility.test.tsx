@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type React from 'react';
 import { render } from 'ink-testing-library';
 import { describe, it, expect, vi } from 'vitest';
 import { Footer } from '../components/Footer.js';
@@ -52,9 +51,13 @@ const createDefaultSettings = (
         },
       },
     },
-  } as never);
+  }) as never;
 
-const renderWithWidth = (width: number, uiState: UIState, settings = createDefaultSettings()) => {
+const renderWithWidth = (
+  width: number,
+  uiState: UIState,
+  settings = createDefaultSettings(),
+) => {
   useTerminalSizeMock.mockReturnValue({ columns: width, rows: 24 });
   return render(
     <ConfigContext.Provider value={createMockConfig() as never}>

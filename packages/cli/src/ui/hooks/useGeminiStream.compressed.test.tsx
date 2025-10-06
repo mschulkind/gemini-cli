@@ -7,7 +7,11 @@
 import * as React from 'react';
 import { test } from 'vitest';
 import { renderWithProviders as render } from '../../test-utils/render.js';
-import type { Config, LoadedSettings, GeminiClient } from '@google/gemini-cli-core';
+import type {
+  Config,
+  LoadedSettings,
+  GeminiClient,
+} from '@google/gemini-cli-core';
 import { TokenUsageProvider, useTokenUsage } from '../TokenUsageContext.js';
 import { SessionStatsProvider } from '../contexts/SessionContext.js';
 import { useGeminiStream } from './useGeminiStream.js';
@@ -36,8 +40,18 @@ function TestApp({
   client,
   eventValue,
 }: {
-  client: { sendMessageStream: (q: unknown, s: AbortSignal, p?: string) => AsyncIterable<unknown> };
-  eventValue?: { originalTokenCount?: number; newTokenCount?: number; compressionThreshold?: number };
+  client: {
+    sendMessageStream: (
+      q: unknown,
+      s: AbortSignal,
+      p?: string,
+    ) => AsyncIterable<unknown>;
+  };
+  eventValue?: {
+    originalTokenCount?: number;
+    newTokenCount?: number;
+    compressionThreshold?: number;
+  };
 }) {
   const history: unknown[] = [];
   const addItem = (_item: unknown, _ts?: number) => {};
@@ -59,7 +73,10 @@ function TestApp({
   const stream = useGeminiStream(
     client as unknown as GeminiClient,
     history as unknown as Array<import('../types.js').HistoryItem>,
-    addItem as any,
+    addItem as unknown as (
+      item: import('../types.js').HistoryItem,
+      ts?: number,
+    ) => void,
     config as unknown as Config,
     settings as unknown as LoadedSettings,
     () => {},
@@ -80,10 +97,12 @@ function TestApp({
   React.useEffect(() => {
     // Call the compression handler directly to exercise instrumentation deterministically.
     if (eventValue) {
-       
       Promise.resolve().then(() =>
         // use a numeric timestamp similar to real usage
-        stream.handleChatCompressionEvent(eventValue as any, Date.now()),
+        stream.handleChatCompressionEvent(
+          eventValue as unknown as unknown,
+          Date.now(),
+        ),
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,8 +120,9 @@ async function waitForCondition(predicate: () => boolean, timeout = 2000) {
     } catch {
       // swallow
     }
-    if (Date.now() - start > timeout) throw new Error('Timed out waiting for condition');
-     
+    if (Date.now() - start > timeout)
+      throw new Error('Timed out waiting for condition');
+
     await new Promise((r) => setTimeout(r, 20));
   }
 }

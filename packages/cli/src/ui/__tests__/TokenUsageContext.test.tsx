@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { describe, it, expect, vi } from 'vitest';
@@ -18,8 +17,8 @@ function Probe({
   usageRef,
   apiRef,
 }: {
-  usageRef?: { current?: any };
-  apiRef?: { current?: any };
+  usageRef?: { current?: unknown };
+  apiRef?: { current?: unknown };
 }) {
   const usage = useTokenUsage();
   const api = useTokenUsageApi();
@@ -49,8 +48,8 @@ describe('TokenUsageContext (behavior tests)', () => {
   });
 
   it('notifies subscribers and updates consumer snapshot when api.update is called', () => {
-    const usageRef: { current?: any } = {};
-    const apiRef: { current?: any } = {};
+    const usageRef: { current?: unknown } = {};
+    const apiRef: { current?: unknown } = {};
 
     render(
       <TokenUsageProvider>

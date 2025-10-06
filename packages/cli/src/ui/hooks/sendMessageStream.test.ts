@@ -5,7 +5,12 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { estimateTokenCount, updateHighWaterMark } from './sendMessageStream.js';
+import {
+  estimateTokenCount,
+  updateHighWaterMark,
+} from './sendMessageStream.js';
+import type { PartListUnion } from '@google/genai';
+import type { TokenUsageApi } from '../TokenUsageContext.js';
 
 describe('estimateTokenCount', () => {
   it('estimates tokens for a short string', () => {
@@ -19,14 +24,14 @@ describe('estimateTokenCount', () => {
   });
 
   it('estimates tokens for parts array', () => {
-    const parts = [{ text: 'This is a test' } as any];
+    const parts = [{ text: 'This is a test' }] as unknown as PartListUnion;
     // 14 chars -> ceil(14/4) = 4
-    expect(estimateTokenCount(parts as any)).toBe(4);
+    expect(estimateTokenCount(parts as unknown as PartListUnion)).toBe(4);
   });
 
   it('returns null for unknown part shapes with no text-like fields', () => {
-    const parts = [{ foo: 'bar' } as any];
-    expect(estimateTokenCount(parts as any)).toBeNull();
+    const parts = [{ foo: 'bar' }] as unknown as PartListUnion;
+    expect(estimateTokenCount(parts as unknown as PartListUnion)).toBeNull();
   });
 });
 
@@ -36,7 +41,7 @@ describe('updateHighWaterMark', () => {
     const api = {
       get: () => ({ highWaterMark: 5 }),
       update,
-    } as any;
+    } as unknown as TokenUsageApi;
 
     updateHighWaterMark(api, 10);
     expect(update).toHaveBeenCalledWith({ highWaterMark: 10 });
@@ -47,7 +52,7 @@ describe('updateHighWaterMark', () => {
     const api = {
       get: () => ({ highWaterMark: 10 }),
       update,
-    } as any;
+    } as unknown as TokenUsageApi;
 
     updateHighWaterMark(api, 5);
     expect(update).not.toHaveBeenCalled();
@@ -58,7 +63,7 @@ describe('updateHighWaterMark', () => {
     const api = {
       get: () => ({}),
       update,
-    } as any;
+    } as unknown as TokenUsageApi;
 
     updateHighWaterMark(api, 7);
     expect(update).toHaveBeenCalledWith({ highWaterMark: 7 });
@@ -67,6 +72,12 @@ describe('updateHighWaterMark', () => {
   it('no-ops when api is undefined or sentCount invalid', () => {
     // Should not throw
     updateHighWaterMark(undefined, 5);
-    updateHighWaterMark({ get: () => ({ highWaterMark: 1 }), update: () => {} } as any, NaN);
+    updateHighWaterMark(
+      {
+        get: () => ({ highWaterMark: 1 }),
+        update: () => {},
+      } as unknown as TokenUsageApi,
+      NaN,
+    );
   });
 });
