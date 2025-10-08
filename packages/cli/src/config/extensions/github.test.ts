@@ -20,7 +20,6 @@ import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
 import * as path from 'node:path';
 import * as tar from 'tar';
-import * as archiver from 'archiver';
 import type { GeminiCLIExtension } from '@google/gemini-cli-core';
 
 const mockPlatform = vi.hoisted(() => vi.fn());
@@ -456,13 +455,48 @@ describe('git extension helpers', () => {
       const dummyFilePath = path.join(tempDir, 'test.txt');
       await fs.writeFile(dummyFilePath, 'hello zip');
 
-      // Create the zip file
+      // Create the zip file (load archiver dynamically to avoid requiring types at build time)
       const output = fsSync.createWriteStream(archivePath);
-      const archive = archiver.create('zip');
 
-      const streamFinished = new Promise((resolve, reject) => {
-        output.on('close', () => resolve(null));
-        archive.on('error', reject);
+      type Archive = {
+        pipe: (out: fsSync.WriteStream) => void;
+        file: (filePath: string, opts: { name: string }) => void;
+        finalize: () => Promise<void> | void;
+        on: (
+          event: 'error' | 'close',
+          listener: (...args: unknown[]) => void,
+        ) => void;
+      };
+      type ArchiverModule = {
+        default?: { create: (format: string) => Archive };
+        create?: (format: string) => Archive;
+      };
+
+      const archiverModule = (await import(
+        'archiver'
+      )) as unknown as ArchiverModule;
+      const candidate =
+        (archiverModule as unknown as { default?: unknown }).default ??
+        archiverModule;
+
+      function isFactory(
+        obj: unknown,
+      ): obj is { create: (format: string) => Archive } {
+        return (
+          !!obj &&
+          typeof (obj as Record<string, unknown>)['create'] === 'function'
+        );
+      }
+
+      if (!isFactory(candidate)) {
+        throw new Error('archiver module does not export a create factory');
+      }
+
+      const archive = candidate.create('zip');
+
+      const streamFinished = new Promise<void>((resolve, reject) => {
+        output.on('close', () => resolve());
+        archive.on('error', (err: unknown) => reject(err));
       });
 
       archive.pipe(output);
