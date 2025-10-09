@@ -5,7 +5,10 @@
  */
 
 import type { TrackedToolCall } from './useReactToolScheduler.js';
-import type { TokenUsageApi, ReadonlyTokenUsage } from '../TokenUsageContext.js';
+import type {
+  TokenUsageApi,
+  ReadonlyTokenUsage,
+} from '../TokenUsageContext.js';
 
 type SaveMemoryResult = {
   memoryTokens?: number;
@@ -23,7 +26,10 @@ export async function handleCompletedToolsInstrumentation(
   performMemoryRefresh: () => Promise<void>,
   processedMemoryToolsRef: Set<string>,
 ): Promise<void> {
-  if (!completedToolCallsFromScheduler || completedToolCallsFromScheduler.length === 0) {
+  if (
+    !completedToolCallsFromScheduler ||
+    completedToolCallsFromScheduler.length === 0
+  ) {
     return;
   }
 
@@ -91,7 +97,9 @@ export async function handleCompletedToolsInstrumentation(
 
       // Fallback: try to parse a number from a human-readable resultDisplay string
       if (memoryTokensFromTool === undefined) {
-        const display = (t as unknown as { response?: { resultDisplay?: unknown } })?.response?.resultDisplay;
+        const display = (
+          t as unknown as { response?: { resultDisplay?: unknown } }
+        )?.response?.resultDisplay;
         if (typeof display === 'string') {
           const m = display.match(/(\d{1,7})/);
           if (m) {

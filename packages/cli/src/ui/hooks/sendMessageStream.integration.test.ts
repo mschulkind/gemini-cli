@@ -7,12 +7,20 @@
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { TokenUsageProvider, useTokenUsage, useTokenUsageApi } from '../TokenUsageContext.js';
+import {
+  TokenUsageProvider,
+  useTokenUsage,
+  useTokenUsageApi,
+} from '../TokenUsageContext.js';
 import { updateHighWaterMark } from './sendMessageStream.js';
 
 function TestFooter() {
   const usage = useTokenUsage();
-  return React.createElement('div', { 'data-testid': 'footer' }, String(usage.highWaterMark));
+  return React.createElement(
+    'div',
+    { 'data-testid': 'footer' },
+    String(usage.highWaterMark),
+  );
 }
 
 function Updater({ sentCount }: { sentCount: number }) {

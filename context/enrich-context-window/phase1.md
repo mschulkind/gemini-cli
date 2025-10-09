@@ -125,16 +125,16 @@ This update reflects workspace changes only; follow repo commit guidelines when 
   - Emitting a ChatCompressed message updates TokenUsageContext values in test runs.
 
 ### T007 · Instrument save_memory handling in handleCompletedTools
- 
- - Status: ✅ Done
- - Started: 2025-10-05T23:12:48Z
- - Completed: 2025-10-05T23:29:30Z
- - Est. Time: 0.5h
- - Todo:
-   - [x] Update `handleCompletedTools` path where `save_memory` is processed to update memoryTokens.
-   - [x] Ensure asynchronous completion updates context promptly.
- - Success criteria:
-   - Memory save flows cause TokenUsageContext.memoryTokens to update in tests.
+
+- Status: ✅ Done
+- Started: 2025-10-05T23:12:48Z
+- Completed: 2025-10-05T23:29:30Z
+- Est. Time: 0.5h
+- Todo:
+  - [x] Update `handleCompletedTools` path where `save_memory` is processed to update memoryTokens.
+  - [x] Ensure asynchronous completion updates context promptly.
+- Success criteria:
+  - Memory save flows cause TokenUsageContext.memoryTokens to update in tests.
 
 ### T008 · Instrument successful sendMessageStream path to update highWaterMark
 

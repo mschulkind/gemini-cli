@@ -4,7 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef, useCallback, useEffect, useMemo, useContext } from 'react';
+import {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useContext,
+} from 'react';
 import type {
   Config,
   EditorType,
@@ -62,10 +69,17 @@ import {
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { useSessionStats } from '../contexts/SessionContext.js';
-import { ApiContext, type TokenUsageApi, type ReadonlyTokenUsage } from '../TokenUsageContext.js';
+import {
+  ApiContext,
+  type TokenUsageApi,
+  type ReadonlyTokenUsage,
+} from '../TokenUsageContext.js';
 import { useKeypress } from './useKeypress.js';
 import type { LoadedSettings } from '../../config/settings.js';
-import { estimateTokenCount, updateHighWaterMark } from './sendMessageStream.js';
+import {
+  estimateTokenCount,
+  updateHighWaterMark,
+} from './sendMessageStream.js';
 
 enum StreamProcessingStatus {
   Completed,
@@ -151,8 +165,9 @@ export const useGeminiStream = (
   const gitService = useMemo(() => {
     // Guard against minimal/stubbed `config` objects used by tests which may not
     // implement getProjectRoot. Call only when available and a function.
-    const maybeGetProjectRoot = (config as unknown as { getProjectRoot?: () => string })
-      .getProjectRoot;
+    const maybeGetProjectRoot = (
+      config as unknown as { getProjectRoot?: () => string }
+    ).getProjectRoot;
     if (typeof maybeGetProjectRoot !== 'function') {
       return;
     }
@@ -655,13 +670,13 @@ export const useGeminiStream = (
       try {
         // Narrow the event payload to a local type for safer access.
         const payload = eventValue as unknown as ChatCompressedPayload;
-  
+
         // Prefer the value from the event when present; otherwise read the
         // current value from the TokenUsage snapshot (if available).
         const compressionThresholdFromEvent =
           payload.compressionThreshold ??
           tokenUsageApiRef.current?.get?.().compressionThreshold;
-  
+
         // Determine sensible values for instrumentation:
         // - compressionThreshold: prefer event value, otherwise use current snapshot
         // - lastSuccessfulRequestTokenCount: prefer originalTokenCount (the
@@ -670,7 +685,7 @@ export const useGeminiStream = (
           payload.originalTokenCount ??
           tokenUsageApiRef.current?.get?.().lastSuccessfulRequestTokenCount ??
           null;
-  
+
         // Apply partial update via the stable ref; guard with try/catch so
         // instrumentation cannot destabilize the UX or tests.
         try {
@@ -685,7 +700,7 @@ export const useGeminiStream = (
         // Defensive: if anything unexpected happens while reading the event,
         // do not let it bubble up.
       }
-  
+
       // Use the narrowed payload for user-visible message formatting too.
       const payloadForMsg = eventValue as unknown as ChatCompressedPayload;
       return addItem(
@@ -700,12 +715,7 @@ export const useGeminiStream = (
         Date.now(),
       );
     },
-    [
-      addItem,
-      config,
-      pendingHistoryItemRef,
-      setPendingHistoryItem,
-    ],
+    [addItem, config, pendingHistoryItemRef, setPendingHistoryItem],
   );
 
   const handleMaxSessionTurnsEvent = useCallback(
@@ -951,7 +961,10 @@ export const useGeminiStream = (
           // the TokenUsage highWaterMark if the estimate is sensible.
           if (processingStatus === StreamProcessingStatus.Completed) {
             try {
-              updateHighWaterMark(tokenUsageApiRef.current, estimatedSentTokenCount);
+              updateHighWaterMark(
+                tokenUsageApiRef.current,
+                estimatedSentTokenCount,
+              );
             } catch {
               // Swallow instrumentation errors so UX/tests are unaffected.
             }
@@ -1092,7 +1105,7 @@ export const useGeminiStream = (
           t.status === 'success' &&
           !processedMemoryToolsRef.current.has(t.request.callId),
       );
-      
+
       if (newSuccessfulMemorySaves.length > 0) {
         // Perform the refresh only if there are new ones.
         void performMemoryRefresh();
@@ -1104,7 +1117,7 @@ export const useGeminiStream = (
             const response = (t as unknown as { response?: unknown }).response;
             let memoryTokensFromTool: number | undefined = undefined;
             let overallTokenCount: number | undefined = undefined;
-    
+
             // Handle array shape e.g. [ { memoryTokens: 123 } ]
             if (Array.isArray(response) && response.length === 1) {
               const first = response[0];
@@ -1144,10 +1157,12 @@ export const useGeminiStream = (
                 overallTokenCount = r.total_token_count;
               }
             }
-    
+
             // Final fallback: try to parse a number from the resultDisplay string.
             if (memoryTokensFromTool === undefined) {
-              const display = (t as unknown as { response?: { resultDisplay?: unknown } })?.response?.resultDisplay;
+              const display = (
+                t as unknown as { response?: { resultDisplay?: unknown } }
+              )?.response?.resultDisplay;
               if (typeof display === 'string') {
                 const m = display.match(/(\d{1,7})/);
                 if (m) {
@@ -1156,7 +1171,7 @@ export const useGeminiStream = (
                 }
               }
             }
-    
+
             const updatePayload: Partial<ReadonlyTokenUsage> = {};
             if (memoryTokensFromTool !== undefined) {
               updatePayload.memoryTokens = memoryTokensFromTool;
@@ -1164,7 +1179,7 @@ export const useGeminiStream = (
             if (overallTokenCount !== undefined) {
               updatePayload.lastSuccessfulRequestTokenCount = overallTokenCount;
             }
-    
+
             if (Object.keys(updatePayload).length > 0) {
               try {
                 tokenUsageApiRef.current?.update?.(updatePayload);
@@ -1176,7 +1191,7 @@ export const useGeminiStream = (
         } catch {
           // Swallow instrumentation errors.
         }
-    
+
         // Mark them as processed so we don't do this again on the next render.
         newSuccessfulMemorySaves.forEach((t) =>
           processedMemoryToolsRef.current.add(t.request.callId),

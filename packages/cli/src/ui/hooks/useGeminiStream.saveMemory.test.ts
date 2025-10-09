@@ -7,7 +7,11 @@
 import React from 'react';
 import { test } from 'vitest';
 import { renderWithProviders as render } from '../../test-utils/render.js';
-import { TokenUsageProvider, useTokenUsage, useTokenUsageApi } from '../TokenUsageContext.js';
+import {
+  TokenUsageProvider,
+  useTokenUsage,
+  useTokenUsageApi,
+} from '../TokenUsageContext.js';
 import { SessionStatsProvider } from '../contexts/SessionContext.js';
 
 function TestApp() {
@@ -16,11 +20,14 @@ function TestApp() {
   React.useEffect(() => {
     // Simulate a save_memory tool completing with returned token counts.
     api.update({ memoryTokens: 789, lastSuccessfulRequestTokenCount: 1000 });
-     
   }, [api]);
 
   // Use React.createElement to avoid JSX parsing issues in .ts files.
-  return React.createElement('pre', { 'data-testid': 'usage' }, JSON.stringify(usage));
+  return React.createElement(
+    'pre',
+    { 'data-testid': 'usage' },
+    JSON.stringify(usage),
+  );
 }
 
 test('save_memory updates TokenUsage.memoryTokens', async () => {
@@ -45,8 +52,9 @@ test('save_memory updates TokenUsage.memoryTokens', async () => {
       } catch {
         // swallow
       }
-      if (Date.now() - start > timeout) throw new Error('Timed out waiting for condition');
-       
+      if (Date.now() - start > timeout)
+        throw new Error('Timed out waiting for condition');
+
       await new Promise((r) => setTimeout(r, 20));
     }
   }
@@ -54,6 +62,9 @@ test('save_memory updates TokenUsage.memoryTokens', async () => {
   await waitForCondition(() => {
     const frame = result.lastFrame();
     const usage = JSON.parse(frame || '{}');
-    return usage.memoryTokens === 789 && usage.lastSuccessfulRequestTokenCount === 1000;
+    return (
+      usage.memoryTokens === 789 &&
+      usage.lastSuccessfulRequestTokenCount === 1000
+    );
   });
 });
